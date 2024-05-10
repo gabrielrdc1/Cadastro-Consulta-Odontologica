@@ -6,41 +6,148 @@ import requests
 import os
 
 app = Flask(__name__)
-from app.models.models import Paciente, Consulta
+from app.models.models import Pacientes, Agenda, DentistaEspecializacao, Dentistas, Especializacao
 
 
-def init_routes(app):  
+load_dotenv()
+def verify_token():
+    id_token = request.headers.get('Authorization')
+    if not id_token:
+        return jsonify({'error': 'Token não fornecido'}), 401
+
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        request.uid = decoded_token['uid']
+    except auth.InvalidIdTokenError:
+        return jsonify({'error': 'Token inválido'}), 401
+    except auth.ExpiredIdTokenError:
+        return jsonify({'error': 'Token expirado'}), 401
+
+def init_routes(app): 
+    @app.before_request
+    def before_request_func():
+        if request.endpoint not in ['login', 'create_paciente']:
+            return verify_token()
+         
     @app.route('/api/pacientes', methods=['POST'])
-    def cadastrar_paciente():
+    def create_paciente():
         data = request.get_json()
-        if 'nome' in data and 'email' in data and 'senha' in data:
-            novo_paciente = Paciente(nome=data['nome'], email=data['email'], senha=data['senha'])
-            novo_paciente.save()
-            return jsonify({"message": "Paciente cadastrado com sucesso"}), 201
-        else:
-            return jsonify({"error": "Nome, email e senha são obrigatórios"}), 400
+        paciente_nome = data['paciente_nome']
+        cpf = data['cpf']
+        email = data['email']
+        password = data['password']
 
-    @app.route('/api/login', methods=['POST'])
+        try:
+            pacient_record = auth.create_user(email=email, password=password)
+            firebase_uid = pacient_record.uid
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+        try:
+            new_pacient = Pacientes(paciente_nome=paciente_nome, cpf=cpf, email=email)
+            new_pacient.save()
+        except Exception as e:
+            auth.delete_user(firebase_uid)
+            return jsonify({"error": str(e)}), 400
+
+        return jsonify({"message": "Paciente created successfully", "firebase_uid": firebase_uid}), 201         
+    
+    
+    @app.route('/login', methods=['POST'])
     def login():
-        data = request.get_json()
-        if 'email' in data and 'senha' in data:
-            paciente = Paciente.query.filter_by(email=data['email'], senha=data['senha']).first()
-            if paciente:
-                access_token = create_access_token(identity=paciente.id)
-                return jsonify(access_token=access_token), 200
-            else:
-                return jsonify({"error": "Credenciais inválidas"}), 401
-        else:
-            return jsonify({"error": "Email e senha são obrigatórios"}), 400
+        email = request.json['email']
+        password = request.json['password']
 
-    @app.route('/api/consultas', methods=['POST'])
-    @jwt_required() 
-    def agendar_consulta():
-        data = request.get_json()
-        if 'data' in data:
-            paciente_id = get_jwt_identity()  
-            nova_consulta = Consulta(data=data['data'], paciente_id=paciente_id)
-            nova_consulta.save()
-            return jsonify({"message": "Consulta agendada com sucesso"}), 201
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={os.getenv('FIREBASE_API_KEY')}"
+
+        payload = json.dumps({
+            "email": email,
+            "password": password,
+            "returnSecureToken": True
+        })
+        headers = {'Content-Type': 'application/json'}
+
+        response = requests.post(url, headers=headers, data=payload)
+        if response.status_code != 200:
+            return jsonify({'error': 'Credenciais inválidas'}), 401
+
+        json_response = response.json()
+        return jsonify({
+            'message': 'Login realizado com sucesso',
+            'token': json_response['idToken'],
+            'refreshToken': json_response['refreshToken']
+        }), 200
+        
+    @app.route('/api/paciente/<int:id>', methods=['GET'])
+    def get_paciente(id):
+        paciente = Pacientes.query.get(id)
+        if paciente:
+            return jsonify(paciente.serialize())
         else:
-            return jsonify({"error": "Data da consulta é obrigatória"}), 400
+            return jsonify({'error': 'Paciente não encontrado'}), 404
+    
+    @app.route('/api/pacientes', methods=['GET'])
+    def get_pacientes():
+        pacientes = Pacientes.query.filter_by(ativo=True).all()
+        if pacientes:
+            pacientes_list = []
+            for paciente in pacientes:
+                paciente_data = {
+                    'id': paciente.id,
+                    'nome': paciente.cliente_nome,
+                    'cpf': paciente.cpf,
+                    'email': paciente.email,
+                    'data_criacao': paciente.data_criacao,
+                    'ativo': 'Sim' if paciente.ativo else 'Não'
+                }
+                pacientes_list.append(paciente_data)
+            
+            return jsonify(pacientes_list), 200
+        else:
+            return jsonify({'message': 'Nenhum paciente encontrado'}), 404
+    
+    
+    @app.route('/api/paciente/<int:id>', methods=['PATCH'])
+    def update_paciente(id):
+        paciente = Pacientes.query.get(id)
+        
+        if paciente:
+            data = request.get_json()
+            paciente.paciente_nome = data['paciente_nome']
+            paciente.cpf = data['cpf']
+            paciente.email = data['email']
+            paciente.save()
+            return jsonify(paciente.serialize()), 200
+        else:
+            return jsonify({'error': 'Paciente não encontrado'}), 404
+
+    @app.route('/api/paciente/ativo/<int:id>', methods=['PATCH'])
+    def desativar_paciente(id):
+        paciente = Pacientes.query.get(id)
+        if paciente:
+            paciente.ativo = False
+            paciente.save()
+            return jsonify(paciente.serialize()), 200
+        
+        else:
+            return jsonify({'error': 'Paciente não encontrado'}), 404
+        
+    @app.route('/api/consultas', methods=['GET'])
+    def get_consultas():
+        consultas = Agenda.query.all()
+        if consultas:
+            consultas_list = []
+            for consulta in consultas:
+                consulta_data = {
+                    'id': consulta.id,
+                    'data': consulta.data,
+                    'hora': consulta.hora,
+                    'paciente': consulta.paciente.cliente_nome,
+                    'dentista': consulta.dentista.dentista_nome,
+                    'especializacao': consulta.especializacao.especializacao_nome,
+                }
+                consultas_list.append(consulta_data)
+            
+            return jsonify(consultas_list), 200
+        else:
+            return jsonify({'message': 'Nenhuma consulta encontrada'}), 404

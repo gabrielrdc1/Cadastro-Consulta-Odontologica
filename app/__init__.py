@@ -9,12 +9,14 @@ def create_app():
    
 app = create_app()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///netflix.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cadastro-odontologico.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 cred = credentials.Certificate("auth-firebase.json")
 firebase_admin.initialize_app(cred)
     
 db = SQLAlchemy(app)
+
+from app.models.models import Pacientes, Agenda, DentistaEspecializacao, Dentistas, Especializacao
 
 with app.app_context():
     db.create_all()
