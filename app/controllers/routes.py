@@ -208,3 +208,49 @@ def init_routes(app):
 
         return jsonify({"message": "Dentista created successfully"}), 201
     
+    @app.route('/api/dentista/<int:id>', methods=['PATCH'])
+    def update_dentista(id):
+        dentista = Dentistas.query.get(id)
+        
+        if dentista:
+            data = request.get_json()
+            dentista_nome = data['dentista_nome']
+            dentista_email = data['dentista_email']
+            
+            if Dentistas.query.filter_by(dentista_email=dentista_email).first():
+                return jsonify({'error': 'Dentista já cadastrado'}), 400
+            
+            dentista.dentista_nome = dentista_nome
+            dentista.dentista_email = dentista_email
+            dentista.save()
+            return jsonify(dentista), 200
+        else:
+            return jsonify({'error': 'Dentista não encontrado'}), 404
+    
+    @app.route('/api/dentista/ativo/<int:id>', methods=['PATCH'])
+    def desativar_dentista(id):
+        dentista = Dentistas.query.get(id)
+        if dentista:
+            dentista.ativo = False
+            dentista.save()
+            return jsonify(dentista), 200
+        
+        else:
+            return jsonify({'error': 'Dentista não encontrado'}), 404
+        
+    @app.route('/api/especializacoes', methods=['GET'])
+    def get_especializacoes():
+        especializacoes = Especializacao.query.all()
+        if especializacoes:
+            especializacoes_list = []
+            for especializacao in especializacoes:
+                especializacao_data = {
+                    'id': especializacao.id,
+                    'nome': especializacao.especializacao_nome,
+                }
+                especializacoes_list.append(especializacao_data)
+            
+            return jsonify(especializacoes_list), 200
+        else:
+            return jsonify({'message': 'Nenhuma especialização encontrada'}), 404
+    
