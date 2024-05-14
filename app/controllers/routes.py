@@ -36,6 +36,9 @@ def init_routes(app):
         cpf = data['cpf']
         email = data['email']
         password = data['password']
+        
+        if Pacientes.query.filter_by(email=email).first():
+            return jsonify({'error': 'Paciente já cadastrado'}), 400
 
         try:
             pacient_record = auth.create_user(email=email, password=password)
@@ -113,11 +116,19 @@ def init_routes(app):
         
         if paciente:
             data = request.get_json()
-            paciente.paciente_nome = data['paciente_nome']
-            paciente.cpf = data['cpf']
-            paciente.email = data['email']
+            paciente_nome = data['paciente_nome']
+            cpf = data['cpf']
+            email = data['email']
+
+            if Pacientes.query.filter_by(email=email).first():
+                return jsonify({'error': 'Paciente já cadastrado'}), 400
+        
+            data = request.get_json()
+            paciente.paciente_nome = paciente_nome
+            paciente.cpf = cpf
+            paciente.email = email 
             paciente.save()
-            return jsonify(paciente.serialize()), 200
+            return jsonify(paciente), 200
         else:
             return jsonify({'error': 'Paciente não encontrado'}), 404
 
@@ -127,7 +138,7 @@ def init_routes(app):
         if paciente:
             paciente.ativo = False
             paciente.save()
-            return jsonify(paciente.serialize()), 200
+            return jsonify(paciente), 200
         
         else:
             return jsonify({'error': 'Paciente não encontrado'}), 404
@@ -151,3 +162,49 @@ def init_routes(app):
             return jsonify(consultas_list), 200
         else:
             return jsonify({'message': 'Nenhuma consulta encontrada'}), 404
+        
+    
+    @app.route('/api/dentistas', methods=['GET'])
+    def get_dentistas():
+        dentistas = Dentistas.query.all()
+        if dentistas:
+            dentistas_list = []
+            for dentista in dentistas:
+                dentista_data = {
+                    'id': dentista.id,
+                    'nome': dentista.dentista_nome,
+                    'cro': dentista.cro,
+                    'data_criacao': dentista.data_criacao,
+                    'ativo': 'Sim' if dentista.ativo else 'Não'
+                }
+                dentistas_list.append(dentista_data)
+            
+            return jsonify(dentistas_list), 200
+        else:
+            return jsonify({'message': 'Nenhum dentista encontrado'}), 404
+        
+    @app.route('/api/dentista/<int:id>', methods=['GET'])
+    def get_dentista(id):
+        dentista = Dentistas.query.get(id)
+        if dentista:
+            return jsonify(dentista)
+        else:
+            return jsonify({'error': 'Dentista não encontrado'}), 404
+        
+    @app.route('/api/dentista', methods=['POST'])
+    def create_dentista():
+        data = request.get_json()
+        dentista_nome = data['dentista_nome']
+        dentista_email = data['dentista_email']
+        
+        if Dentistas.query.filter_by(dentista_email=dentista_email).first():
+            return jsonify({'error': 'Dentista já cadastrado'}), 400
+
+        try:
+            new_dentista = Dentistas(dentista_nome=dentista_nome, dentista_email=dentista_email)
+            new_dentista.save()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+        return jsonify({"message": "Dentista created successfully"}), 201
+    
