@@ -96,8 +96,8 @@ def init_routes(app):
             pacientes_list = []
             for paciente in pacientes:
                 paciente_data = {
-                    'id': paciente.id,
-                    'nome': paciente.cliente_nome,
+                    'id': paciente.paciente_id,
+                    'nome': paciente.paciente_nome,
                     'cpf': paciente.cpf,
                     'email': paciente.email,
                     'data_criacao': paciente.data_criacao,
@@ -120,7 +120,7 @@ def init_routes(app):
             cpf = data['cpf']
             email = data['email']
 
-            if Pacientes.query.filter_by(email=email).first():
+            if Pacientes.query.filter_by(email=email).first() and Pacientes.query.filter_by(cpf=cpf).first() :
                 return jsonify({'error': 'Paciente já cadastrado'}), 400
         
             data = request.get_json()
@@ -162,6 +162,30 @@ def init_routes(app):
             return jsonify(consultas_list), 200
         else:
             return jsonify({'message': 'Nenhuma consulta encontrada'}), 404
+        
+    @app.route('/api/consulta/<int:id>', methods=['GET'])
+    def get_consulta(id):
+        consulta = Agenda.query.get(id)
+        if consulta:
+            return jsonify(consulta)
+        else:
+            return jsonify({'error': 'Consulta não encontrada'}), 404
+        
+    @app.route('/api/consulta', methods=['POST'])
+    def create_consulta():
+        data = request.get_json()
+        paciente_id = data['paciente_id']
+        dent_esp_id = data['dent_esp_id']
+        data_consulta = data['data_consulta']
+        hora_consulta = data['hora_consulta']
+        
+        try:
+            new_consulta = Agenda(paciente_id=paciente_id, dent_esp_id=dent_esp_id, data=data_consulta, hora_consulta=hora_consulta)
+            new_consulta.save()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+        return jsonify({"message": "Consulta created successfully"}), 201
         
     
     @app.route('/api/dentistas', methods=['GET'])
