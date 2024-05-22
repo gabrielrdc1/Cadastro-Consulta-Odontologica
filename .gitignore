@@ -131,7 +131,7 @@ dist
 .pnp.*
 
 # firebase
-.auth-firebase.json
+auth-firebase.json
 
 #database
 instance/

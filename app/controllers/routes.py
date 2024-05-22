@@ -37,7 +37,7 @@ def init_routes(app):
         email = data['email']
         password = data['password']
         
-        if Pacientes.query.filter_by(email=email).first():
+        if Pacientes.query.filter_by(email=email).first() or Pacientes.query.filter_by(cpf=cpf).first() :
             return jsonify({'error': 'Paciente já cadastrado'}), 400
 
         try:
@@ -85,7 +85,7 @@ def init_routes(app):
     def get_paciente(id):
         paciente = Pacientes.query.get(id)
         if paciente:
-            return jsonify(paciente.serialize())
+            return jsonify(paciente), 200
         else:
             return jsonify({'error': 'Paciente não encontrado'}), 404
     
@@ -120,7 +120,7 @@ def init_routes(app):
             cpf = data['cpf']
             email = data['email']
 
-            if Pacientes.query.filter_by(email=email).first() and Pacientes.query.filter_by(cpf=cpf).first() :
+            if Pacientes.query.filter_by(email=email).first() or Pacientes.query.filter_by(cpf=cpf).first() :
                 return jsonify({'error': 'Paciente já cadastrado'}), 400
         
             data = request.get_json()
@@ -197,7 +197,7 @@ def init_routes(app):
                 dentista_data = {
                     'id': dentista.id,
                     'nome': dentista.dentista_nome,
-                    'cro': dentista.cro,
+                    'email': dentista.email,
                     'data_criacao': dentista.data_criacao,
                     'ativo': 'Sim' if dentista.ativo else 'Não'
                 }

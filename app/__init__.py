@@ -9,7 +9,8 @@ def create_app():
    
 app = create_app()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/dbname'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/dbname'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 cred = credentials.Certificate("auth-firebase.json")
 firebase_admin.initialize_app(cred)
