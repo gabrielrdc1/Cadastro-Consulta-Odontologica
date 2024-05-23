@@ -4,13 +4,63 @@ from dotenv import load_dotenv
 import json
 import requests
 import os
+from flask_validate_json import validate_json
+import re
 
 app = Flask(__name__)
 from app.models.models import Pacientes, Agenda, DentistaEspecializacao, Dentistas, Especializacao
 
+schema_paciente = {
+    "type": "object",
+    "properties": {
+        "paciente_nome": {"type": "string"},
+        "cpf": {"type": "string"},
+        "email": {"type": "string"},
+        "password": {"type": "string"}
+    },
+    "required": ["paciente_nome", "cpf", "email", "password"]
+}
+
+schema_consulta = {
+    "type": "object",
+    "properties": {
+        "paciente_id": {"type": "integer"},
+        "dent_esp_id": {"type": "integer"},
+        "data_consulta": {"type": "string"},
+        "hora_consulta": {"type": "string"}
+    },
+    "required": ["paciente_id", "dent_esp_id", "data_consulta", "hora_consulta"]
+}
+
+schema_dentista = {
+    "type": "object",
+    "properties": {
+        "dentista_nome": {"type": "string"},
+        "dentista_email": {"type": "string"}
+    },
+    "required": ["dentista_nome", "dentista_email"]
+}
+
+schema_especializacao = {
+    "type": "object",
+    "properties": {
+        "especializacao_nome": {"type": "string"}
+    },
+    "required": ["especializacao_nome"]
+}
+
+schema_dentista_especializacao = {
+    "type": "object",
+    "properties": {
+        "dentista_id": {"type": "integer"},
+        "especializacao_id": {"type": "integer"}
+    },
+    "required": ["dentista_id", "especializacao_id"]
+}
+
 
 load_dotenv()
-def verify_token():
+def verify_token(usuario = True):
     id_token = request.headers.get('Authorization')
     if not id_token:
         return jsonify({'error': 'Token não fornecido'}), 401
@@ -18,6 +68,7 @@ def verify_token():
     try:
         decoded_token = auth.verify_id_token(id_token)
         request.uid = decoded_token['uid']
+        
     except auth.InvalidIdTokenError:
         return jsonify({'error': 'Token inválido'}), 401
     except auth.ExpiredIdTokenError:
@@ -27,9 +78,13 @@ def init_routes(app):
     @app.before_request
     def before_request_func():
         if request.endpoint not in ['login', 'create_paciente']:
+            if request.endpoint in ['create_dentista_especializacao', 'get_consultas']:
+                return verify_token(usuario=False)
             return verify_token()
+
          
     @app.route('/api/pacientes', methods=['POST'])
+    @validate_json(schema_paciente)
     def create_paciente():
         data = request.get_json()
         paciente_nome = data['paciente_nome']
@@ -54,7 +109,6 @@ def init_routes(app):
             return jsonify({"error": str(e)}), 400
 
         return jsonify({"message": "Paciente created successfully", "firebase_uid": firebase_uid}), 201         
-    
     
     @app.route('/login', methods=['POST'])
     def login():
@@ -172,6 +226,7 @@ def init_routes(app):
             return jsonify({'error': 'Consulta não encontrada'}), 404
         
     @app.route('/api/consulta', methods=['POST'])
+    @validate_json(schema_consulta)
     def create_consulta():
         data = request.get_json()
         paciente_id = data['paciente_id']
@@ -186,6 +241,26 @@ def init_routes(app):
             return jsonify({"error": str(e)}), 400
 
         return jsonify({"message": "Consulta created successfully"}), 201
+    
+    @app.route('/api/consulta/<int:id>', methods=['PATCH'])
+    def update_consulta(id):
+        consulta = Agenda.query.get(id)
+        
+        if consulta:
+            data = request.get_json()
+            paciente_id = data['paciente_id']
+            dent_esp_id = data['dent_esp_id']
+            data_consulta = data['data_consulta']
+            hora_consulta = data['hora_consulta']
+            
+            consulta.paciente_id = paciente_id
+            consulta.dent_esp_id = dent_esp_id
+            consulta.data = data_consulta
+            consulta.hora = hora_consulta
+            consulta.save()
+            return jsonify(consulta), 200
+        else:
+            return jsonify({'error': 'Consulta não encontrada'}), 404
         
     
     @app.route('/api/dentistas', methods=['GET'])
@@ -216,6 +291,7 @@ def init_routes(app):
             return jsonify({'error': 'Dentista não encontrado'}), 404
         
     @app.route('/api/dentista', methods=['POST'])
+    @validate_json(schema_dentista)
     def create_dentista():
         data = request.get_json()
         dentista_nome = data['dentista_nome']
@@ -277,4 +353,92 @@ def init_routes(app):
             return jsonify(especializacoes_list), 200
         else:
             return jsonify({'message': 'Nenhuma especialização encontrada'}), 404
+        
+    @app.route('/api/especializacao/<int:id>', methods=['GET'])
+    def get_especializacao(id):
+        especializacao = Especializacao.query.get(id)
+        if especializacao:
+            return jsonify(especializacao)
+        else:
+            return jsonify({'error': 'Especialização não encontrada'}), 404
+        
+    @app.route('/api/especializacao', methods=['POST'])
+    @validate_json(schema_especializacao)
+    def create_especializacao():
+        data = request.get_json()
+        especializacao_nome = data['especializacao_nome']
+        
+        if Especializacao.query.filter_by(especializacao_nome=especializacao_nome).first():
+            return jsonify({'error': 'Especialização já cadastrada'}), 400
+
+        try:
+            new_especializacao = Especializacao(especializacao_nome=especializacao_nome)
+            new_especializacao.save()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+        return jsonify({"message": "Especialização created successfully"}), 201
+    
+    @app.route('/api/especializacao/<int:id>', methods=['PATCH'])
+    def update_especializacao(id):
+        especializacao = Especializacao.query.get(id)
+        
+        if especializacao:
+            data = request.get_json()
+            especializacao_nome = data['especializacao_nome']
+            
+            if Especializacao.query.filter_by(especializacao_nome=especializacao_nome).first():
+                return jsonify({'error': 'Especialização já cadastrada'}), 400
+            
+            especializacao.especializacao_nome = especializacao_nome
+            especializacao.save()
+            return jsonify(especializacao), 200
+        else:
+            return jsonify({'error': 'Especialização não encontrada'}), 404
+        
+    @app.route('/api/especializacao/ativo/<int:id>', methods=['PATCH'])
+    def desativar_especializacao(id):
+        especializacao = Especializacao.query.get(id)
+        if especializacao:
+            especializacao.ativo = False
+            especializacao.save()
+            return jsonify(especializacao), 200
+        
+        else:
+            return jsonify({'error': 'Especialização não encontrada'}), 404
+        
+    @app.route('/api/dentista-especializacao', methods=['POST'])
+    @validate_json(schema_dentista_especializacao)
+    def create_dentista_especializacao():
+        data = request.get_json()
+        dentista_id = data['dentista_id']
+        especializacao_id = data['especializacao_id']
+        
+        if DentistaEspecializacao.query.filter_by(dentista_id=dentista_id, especializacao_id=especializacao_id).first():
+            return jsonify({'error': 'Relação já cadastrada'}), 400
+
+        try:
+            new_dentista_especializacao = DentistaEspecializacao(dentista_id=dentista_id, especializacao_id=especializacao_id)
+            new_dentista_especializacao.save()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+        return jsonify({"message": "Relação created successfully"}), 201
+    
+    @app.route('/api/dentista-especializacao/<int:id>', methods=['GET'])
+    def get_dentista_especializacao(id):
+        dentista_especializacao = DentistaEspecializacao.query.get(id)
+        if dentista_especializacao:
+            return jsonify(dentista_especializacao)
+        else:
+            return jsonify({'error': 'Relação não encontrada'}), 404
+        
+    @app.route('/api/dentista-especializacao/<int:id>', methods=['DELETE'])
+    def delete_dentista_especializacao(id):
+        dentista_especializacao = DentistaEspecializacao.query.get(id)
+        if dentista_especializacao:
+            dentista_especializacao.delete()
+            return jsonify({'message': 'Relação deletada com sucesso'}), 200
+        else:
+            return jsonify({'error': 'Relação não encontrada'}), 404
     

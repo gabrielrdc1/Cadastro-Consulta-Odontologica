@@ -37,6 +37,7 @@ class DentistaEspecializacao(db.Model):
         
 class Dentistas(db.Model):
     dentista_id = db.Column(db.Integer, primary_key=True)
+    firabase_uid = db.Column(db.String(100), nullable=False)
     dentista_nome = db.Column(db.String(100), nullable=False)
     dentista_email = db.Column(db.String(100), unique=True, nullable=False)
     ativo = db.Column(db.Boolean, default=True)
