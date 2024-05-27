@@ -14,8 +14,14 @@ schema_paciente = {
     "type": "object",
     "properties": {
         "paciente_nome": {"type": "string"},
-        "cpf": {"type": "string"},
-        "email": {"type": "string"},
+        "cpf": {
+            "type": "string",
+            "pattern": "^\\d{11}$"
+        },
+        "email": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$"
+        },
         "password": {"type": "string"}
     },
     "required": ["paciente_nome", "cpf", "email", "password"]
@@ -204,10 +210,10 @@ def init_routes(app):
             consultas_list = []
             for consulta in consultas:
                 consulta_data = {
-                    'id': consulta.id,
-                    'data': consulta.data,
-                    'hora': consulta.hora,
-                    'paciente': consulta.paciente.cliente_nome,
+                    'id': consulta.agenda_id,
+                    'data': consulta.data_consulta,
+                    'hora': consulta.hora_consulta,
+                    'paciente': consulta.paciente.paciente_nome,
                     'dentista': consulta.dentista.dentista_nome,
                     'especializacao': consulta.especializacao.especializacao_nome,
                 }
@@ -255,8 +261,8 @@ def init_routes(app):
             
             consulta.paciente_id = paciente_id
             consulta.dent_esp_id = dent_esp_id
-            consulta.data = data_consulta
-            consulta.hora = hora_consulta
+            consulta.data_consulta = data_consulta
+            consulta.hora_consulta = hora_consulta
             consulta.save()
             return jsonify(consulta), 200
         else:
@@ -270,9 +276,9 @@ def init_routes(app):
             dentistas_list = []
             for dentista in dentistas:
                 dentista_data = {
-                    'id': dentista.id,
+                    'id': dentista.dentista_id,
                     'nome': dentista.dentista_nome,
-                    'email': dentista.email,
+                    'email': dentista.dentista_email,
                     'data_criacao': dentista.data_criacao,
                     'ativo': 'Sim' if dentista.ativo else 'Não'
                 }
