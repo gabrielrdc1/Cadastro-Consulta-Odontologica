@@ -29,7 +29,7 @@ const LoginScreen = () => {
         await setItem('userName', userName); 
         setToken(token); 
         Alert.alert(`Bem Vindo(a), ${userName}!`);
-        navigation.navigate('Profile'); 
+        navigation.navigate('Main'); 
       } else {
         Alert.alert('Login Failed', 'Unexpected error occurred');
       }

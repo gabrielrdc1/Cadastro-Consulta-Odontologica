@@ -27,9 +27,9 @@ const RegisterScreen = () => {
     try {
       const response = await axiosInstance.post('/api/pacientes', payload);
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         Alert.alert('Cadastro realizado com sucesso');
-        navigation.navigate('Login');
+        navigation.replace('Main');
       } else {
         Alert.alert('Registration Failed', 'Unexpected error occurred');
       }

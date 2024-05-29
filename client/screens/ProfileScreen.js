@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, Image, Button } from 'react-native';
 import axiosInstance from '../axiosInstance';
 import { getItem } from '../utils/secureStore'; 
 
@@ -57,12 +57,20 @@ const ProfileScreen = () => {
 
   const renderPaciente = (paciente) => (
     <View style={styles.pacienteContainer}>
+      <Image 
+        source={require('../assets/usuario.png')}
+        style={styles.profileImage} 
+      />
+      <Text style={styles.name}>{paciente.nome}</Text>
       <Text style={styles.label}>ID: {paciente.id}</Text>
-      <Text style={styles.label}>Nome: {paciente.nome}</Text>
       <Text style={styles.label}>CPF: {paciente.cpf}</Text>
       <Text style={styles.label}>Email: {paciente.email}</Text>
       <Text style={styles.label}>Data de Criação: {paciente.data_criacao}</Text>
-      <Text style={styles.label}>Ativo: {paciente.ativo ? 'Sim' : 'Não'}</Text>
+      <Text style={styles.label}>Ativo: {paciente.ativo}</Text>
+      <Button
+        title="Editar Perfil"
+        onPress={() => Alert.alert('Editar Perfil', 'Funcionalidade em desenvolvimento')}
+      />
     </View>
   );
 
@@ -91,19 +99,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f0f0f0',
   },
   pacienteContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
+    padding: 15,
+    marginVertical: 10,
+    borderRadius: 10,
     width: '100%',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+    alignItems: 'center', // Center the content
+  },
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 15,
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   label: {
     fontSize: 16,
-    marginVertical: 2,
+    marginVertical: 5,
+    color: '#333',
   },
 });
 
