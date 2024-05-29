@@ -242,7 +242,7 @@ def init_routes(app):
             for consulta in consultas:
                 consulta_data = {
                     'id': consulta.agenda_id,
-                    'data': consulta.data_consulta,
+                    'data': consulta.data_consulta.strftime('%d/%m/%Y'),
                     'hora': consulta.hora_consulta,
                     'paciente': consulta.paciente.paciente_nome,
                     'dentista': consulta.dentista.dentista_nome,
@@ -333,17 +333,25 @@ def init_routes(app):
         data = request.get_json()
         dentista_nome = data['dentista_nome']
         dentista_email = data['dentista_email']
+        password = data['password']
         
         if Dentistas.query.filter_by(dentista_email=dentista_email).first():
             return jsonify({'error': 'Dentista já cadastrado'}), 400
-
+        
         try:
-            new_dentista = Dentistas(dentista_nome=dentista_nome, dentista_email=dentista_email)
-            new_dentista.save()
+            pacient_record = auth.create_user(email=dentista_email, password=password)
+            firebase_uid = pacient_record.uid
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
-        return jsonify({"message": "Dentista created successfully"}), 201
+        try:
+            new_dentista = Dentistas(dentista_nome=dentista_nome, firabase_uid = firebase_uid,  dentista_email=dentista_email)
+            new_dentista.save()
+        except Exception as e:
+            auth.delete_user(firebase_uid)
+            return jsonify({"error": str(e)}), 400
+
+        return jsonify({"message": "Dentista created successfully", "firebase_uid": firebase_uid}), 201
     
     @app.route('/api/dentista/<int:id>', methods=['PATCH'])
     def update_dentista(id):
@@ -382,7 +390,7 @@ def init_routes(app):
             especializacoes_list = []
             for especializacao in especializacoes:
                 especializacao_data = {
-                    'id': especializacao.id,
+                    'id': especializacao.especializacao_id,
                     'nome': especializacao.especializacao_nome,
                 }
                 especializacoes_list.append(especializacao_data)
@@ -444,18 +452,36 @@ def init_routes(app):
         else:
             return jsonify({'error': 'Especialização não encontrada'}), 404
         
+    @app.route('/api/dentista-especializacoes', methods=['GET'])
+    def get_dentista_especializacoes():
+        dentista_especializacoes = DentistaEspecializacao.query.all()
+        if dentista_especializacoes:
+            dentista_especializacoes_list = []
+            for dentista_especializacao in dentista_especializacoes:
+                dentista_especializacao_data = {
+                    'id': dentista_especializacao.especializacao_id,
+                    'dentista': dentista_especializacao.dentista_id,
+                    'especializacao': dentista_especializacao.especializacao_id,
+                }
+                dentista_especializacoes_list.append(dentista_especializacao_data)
+            
+            return jsonify(dentista_especializacoes_list), 200
+        else:
+            return jsonify({'message': 'Nenhuma relação encontrada'}), 404
+        
     @app.route('/api/dentista-especializacao', methods=['POST'])
     @validate_json(schema_dentista_especializacao)
     def create_dentista_especializacao():
         data = request.get_json()
         dentista_id = data['dentista_id']
         especializacao_id = data['especializacao_id']
+        tempo = data['tempo']
         
         if DentistaEspecializacao.query.filter_by(dentista_id=dentista_id, especializacao_id=especializacao_id).first():
             return jsonify({'error': 'Relação já cadastrada'}), 400
 
         try:
-            new_dentista_especializacao = DentistaEspecializacao(dentista_id=dentista_id, especializacao_id=especializacao_id)
+            new_dentista_especializacao = DentistaEspecializacao(dentista_id=dentista_id, especializacao_id=especializacao_id, tempo=tempo)
             new_dentista_especializacao.save()
         except Exception as e:
             return jsonify({"error": str(e)}), 400
