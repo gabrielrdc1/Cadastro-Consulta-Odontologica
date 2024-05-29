@@ -1,75 +1,68 @@
-// ProfileScreen.js
-import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import axiosInstance from '../axiosInstance';
-import { AuthContext } from '../middleware/AuthContext';
-import { jwtDecode } from "jwt-decode";
-import { getToken } from '../utils/secureStore';
-import base64 from 'react-native-base64';
+import { getItem } from '../utils/secureStore'; 
 
 const ProfileScreen = () => {
-  const [pacientes, setPacientes] = useState([]);
+  const [paciente, setPaciente] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [patientId, setPatientId] = useState(null);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    const loadTokenAndFetchPacientes = async () => {
+    const loadTokenAndFetchPaciente = async () => {
       try {
-        const storedToken = await getToken('authToken');
-        console.log('Stored token:', storedToken);
-        if (storedToken) {
-          let teste = base64.decode(storedToken);
-          const decodedToken = jwtDecode(teste);
-          console.log('Decoded token:', decodedToken);
-          setPatientId(decodedToken.id);
-          fetchPacientes(decodedToken.id, storedToken);
+        const token = await getItem('authToken');
+        const storedUserId = await getItem('userId');
+
+        if (token && storedUserId) {
+          setUserId(storedUserId);
+          fetchPaciente(storedUserId, token);
         } else {
-          Alert.alert('Error', 'Token não encontrado');
+          Alert.alert('Erro', 'Token ou ID do usuário não encontrado');
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to decode token:', error);
-        Alert.alert('Error', 'Failed to decode token');
+        console.error('Falha ao carregar o token:', error);
+        Alert.alert('Erro', 'Falha ao carregar o token');
         setLoading(false);
       }
     };
 
-    loadTokenAndFetchPacientes();
+    loadTokenAndFetchPaciente();
   }, []);
 
-  const fetchPacientes = async (patientId, authToken) => {
+  const fetchPaciente = async (userId, token) => {
     try {
-      console.log('Token being sent:', authToken);
-      const response = await axiosInstance.get(`/api/pacientes/${patientId}`, {
+      const response = await axiosInstance.get(`/api/paciente/${userId}`, {
         headers: {
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `${token}`,
         },
       });
 
-      if (response.status === 200 && Array.isArray(response.data)) {
-        setPacientes(response.data);
+      if (response.status === 200 && response.data) {
+        setPaciente(response.data);
       } else {
-        Alert.alert('Error', 'Unexpected response format');
+        Alert.alert('Erro', 'Formato de resposta inesperado');
       }
     } catch (error) {
       if (error.response) {
-        Alert.alert('Error', `Failed to fetch patients: ${error.response.data.error}`);
+        Alert.alert('Erro', `Falha ao buscar paciente: ${error.response.data.error}`);
       } else {
-        Alert.alert('Error', `Failed to fetch patients: ${error.message}`);
+        Alert.alert('Erro', `Falha ao buscar paciente: ${error.message}`);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const renderPaciente = ({ item }) => (
+  const renderPaciente = (paciente) => (
     <View style={styles.pacienteContainer}>
-      <Text style={styles.label}>ID: {item.id}</Text>
-      <Text style={styles.label}>Nome: {item.nome}</Text>
-      <Text style={styles.label}>CPF: {item.cpf}</Text>
-      <Text style={styles.label}>Email: {item.email}</Text>
-      <Text style={styles.label}>Data de Criação: {item.data_criacao}</Text>
-      <Text style={styles.label}>Ativo: {item.ativo}</Text>
+      <Text style={styles.label}>ID: {paciente.id}</Text>
+      <Text style={styles.label}>Nome: {paciente.nome}</Text>
+      <Text style={styles.label}>CPF: {paciente.cpf}</Text>
+      <Text style={styles.label}>Email: {paciente.email}</Text>
+      <Text style={styles.label}>Data de Criação: {paciente.data_criacao}</Text>
+      <Text style={styles.label}>Ativo: {paciente.ativo ? 'Sim' : 'Não'}</Text>
     </View>
   );
 
@@ -83,12 +76,11 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={pacientes}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderPaciente}
-        ListEmptyComponent={<Text style={styles.label}>Nenhum paciente encontrado</Text>}
-      />
+      {paciente ? (
+        renderPaciente(paciente)
+      ) : (
+        <Text style={styles.label}>Nenhum paciente encontrado</Text>
+      )}
     </View>
   );
 };

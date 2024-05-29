@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Função para armazenar o token
 const storeToken = async (token) => {
   try {
     await AsyncStorage.setItem('@userToken', token);
@@ -9,7 +8,6 @@ const storeToken = async (token) => {
   }
 };
 
-// Função para recuperar o token
 const getToken = async () => {
   try {
     return await AsyncStorage.getItem('@userToken');

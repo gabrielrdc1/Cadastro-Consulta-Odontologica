@@ -135,17 +135,48 @@ def init_routes(app):
             return jsonify({'error': 'Credenciais inválidas'}), 401
 
         json_response = response.json()
+        id_token = json_response['idToken']
+
+        try:
+            decoded_token = auth.verify_id_token(id_token)
+            uid = decoded_token['uid']
+        except Exception as e:
+            return jsonify({'error': 'Falha ao obter o UID do usuário'}), 500
+
+        paciente = Pacientes.query.filter_by(email=email).first()
+        dentista = Dentistas.query.filter_by(dentista_email=email).first()
+
+        if paciente:
+            user_id = paciente.paciente_id
+            user_name = paciente.paciente_nome
+        elif dentista:
+            user_id = dentista.dentista_id
+            user_name = dentista.dentista_nome
+        else:
+            return jsonify({'error': 'Usuário não encontrado no banco de dados'}), 404
+
         return jsonify({
             'message': 'Login realizado com sucesso',
-            'token': json_response['idToken'],
-            'refreshToken': json_response['refreshToken']
+            'token': id_token,
+            'refreshToken': json_response['refreshToken'],
+            'userId': user_id,
+            'userName': user_name,
         }), 200
+
         
     @app.route('/api/paciente/<int:id>', methods=['GET'])
     def get_paciente(id):
         paciente = Pacientes.query.get(id)
         if paciente:
-            return jsonify(paciente), 200
+            paciente_data = {
+                'id': paciente.paciente_id,
+                'nome': paciente.paciente_nome,
+                'cpf': paciente.cpf,
+                'email': paciente.email,
+                'data_criacao': paciente.data_criacao,
+                'ativo': 'Sim' if paciente.ativo else 'Não'
+            }
+            return jsonify(paciente_data), 200
         else:
             return jsonify({'error': 'Paciente não encontrado'}), 404
     

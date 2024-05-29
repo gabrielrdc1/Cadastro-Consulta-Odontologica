@@ -3,17 +3,18 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } fro
 import { useNavigation } from '@react-navigation/native';
 import axiosInstance from '../axiosInstance';
 import { AuthContext } from '../middleware/AuthContext';
-import { saveToken } from '../utils/secureStore'; // Importe a função saveToken
+import { saveToken } from '../utils/secureStore'; 
+import { setItem } from '../utils/secureStore';
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
   const { setToken } = useContext(AuthContext);
 
   const handleLogin = async () => {
     const payload = {
-      email: username,
+      email: email,
       password: password,
     };
 
@@ -21,12 +22,14 @@ const LoginScreen = () => {
       const response = await axiosInstance.post('/login', payload);
 
       if (response.status === 200) {
-        const { token, username } = response.data;
-        console.log('Token:', token); // Verifique o token no console
-        await saveToken('authToken', token); // Armazena o token no armazenamento seguro
-        setToken(token); // Armazena o token no contexto
-        Alert.alert(`Bem Vindo(a), ${username}!`);
-        navigation.navigate('Profile'); // Redireciona para a tela de perfil
+        const { token, refreshToken, userId, userName } = response.data;
+        await setItem('authToken', token); 
+        await setItem('refreshToken', refreshToken); 
+        await setItem('userId', userId.toString());
+        await setItem('userName', userName); 
+        setToken(token); 
+        Alert.alert(`Bem Vindo(a), ${userName}!`);
+        navigation.navigate('Profile'); 
       } else {
         Alert.alert('Login Failed', 'Unexpected error occurred');
       }
@@ -50,8 +53,8 @@ const LoginScreen = () => {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        value={username}
-        onChangeText={setUsername}
+        value={email}
+        onChangeText={setEmail}
         placeholderTextColor="#ccc"
         keyboardType="email-address"
         autoCapitalize="none"
