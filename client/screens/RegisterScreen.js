@@ -29,7 +29,7 @@ const RegisterScreen = () => {
 
       if (response.status === 201) {
         Alert.alert('Cadastro realizado com sucesso');
-        navigation.replace('Main');
+        navigation.replace('Login');
       } else {
         Alert.alert('Registration Failed', 'Unexpected error occurred');
       }

@@ -28,6 +28,7 @@ class Agenda(db.Model):
 class DentistaEspecializacao(db.Model):
     dent_espec_id = db.Column(db.Integer, primary_key=True)
     dentista_id = db.Column(db.Integer, db.ForeignKey('dentistas.dentista_id'), nullable=False)
+    dentista_nome = db.relationship('Dentistas', back_populates='especializacoes')
     especializacao_id = db.Column(db.Integer, db.ForeignKey('especializacao.especializacao_id'), nullable=False)
     tempo = db.Column(db.Integer, nullable=False)
     
@@ -42,6 +43,7 @@ class Dentistas(db.Model):
     dentista_email = db.Column(db.String(100), unique=True, nullable=False)
     ativo = db.Column(db.Boolean, default=True)
     data_criacao = db.Column(db.DateTime, default=datetime.datetime.now)
+    especializacoes = db.relationship('DentistaEspecializacao', back_populates='dentista_nome')
     
     def save(self):
         db.session.add(self)

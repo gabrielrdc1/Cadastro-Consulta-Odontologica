@@ -14,12 +14,12 @@ const MainTabNavigator = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'Perfil') {
-            iconName = focused ? 'person-circle' : 'person-circle-outline';
-          } else if (route.name === 'Agenda') {
+          if (route.name === 'Agenda') {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'Horários Marcados') {
             iconName = focused ? 'time' : 'time-outline';
+          } else if (route.name === 'Perfil') {
+            iconName = focused ? 'person-circle' : 'person-circle-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;

@@ -16,7 +16,7 @@ const AgendaScreen = () => {
   const [horaConsulta, setHoraConsulta] = useState('');
   const [especializacoes, setEspecializacoes] = useState([]);
   const [dentistas, setDentistas] = useState([]);
-  const [stage, setStage] = useState(1); // 1: Select specialization, 2: Select dentist, 3: Select date and time
+  const [stage, setStage] = useState(1); 
 
   useEffect(() => {
     const loadTokenAndFetchData = async () => {
@@ -43,7 +43,7 @@ const AgendaScreen = () => {
     try {
       const response = await axiosInstance.get('/api/especializacoes', {
         headers: {
-          Authorization: `${token}`,
+          Authorization: `eyJhbGciOiJSUzI1NiIsImtpZCI6IjVkNjE3N2E5Mjg2ZDI1Njg0NTI2OWEzMTM2ZDNmNjY0MjZhNGQ2NDIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHJvamV0by10ZXN0ZS1hNTk0NSIsImF1ZCI6InByb2pldG8tdGVzdGUtYTU5NDUiLCJhdXRoX3RpbWUiOjE3MTcwMjcwMTIsInVzZXJfaWQiOiJXSHRqVTdCTU1WV0RJbU1KbTdKQWZRdnowbGQyIiwic3ViIjoiV0h0alU3Qk1NVldESW1NSm03SkFmUXZ6MGxkMiIsImlhdCI6MTcxNzAyNzAxMiwiZXhwIjoxNzE3MDMwNjEyLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidmljdG9yQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.vExusAod10TQCGNsRVRh0T5iirxETABS75xWwZ3VChM3QenKd-DWEt51dqHQkNHyDPem2JgnHgDSuUhk_dJ5t35a2IDJNJIKhun6D46BES2w084XDEIXGVDuCsc31jUvBLM7ciuEMrNIAKKY275a5Vfa4txRzN5znSzRZu9Yp3u8-l3ChHgrRll-hyPi8tFDNTTxMl313aBHZjR1d_hcpGGDl4osuOm8gG5PpLgvbvY8ieTZ_oIyqOvTJWYGSlPfFEYGndPIbsi3si5Bshd100eZcprqYBrrrDFhSfqvgL-tQitwPv_QYF5JFKGpdCEM-ADrOzc2hJAeSNJKwbaTjQ`,
         },
       });
 
@@ -66,14 +66,12 @@ const AgendaScreen = () => {
   const fetchDentistasPorEspecializacao = async (especializacaoId) => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/api/dentista-especializacoes', {
+      const response = await axiosInstance.get(`/api/dentista-especializacao/${especializacaoId}`, {
         headers: {
-          Authorization: `${token}`,
-        },
-        params: {
-          especializacao_id: especializacaoId,
-        },
+          Authorization: `eyJhbGciOiJSUzI1NiIsImtpZCI6IjVkNjE3N2E5Mjg2ZDI1Njg0NTI2OWEzMTM2ZDNmNjY0MjZhNGQ2NDIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHJvamV0by10ZXN0ZS1hNTk0NSIsImF1ZCI6InByb2pldG8tdGVzdGUtYTU5NDUiLCJhdXRoX3RpbWUiOjE3MTcwMjcwMTIsInVzZXJfaWQiOiJXSHRqVTdCTU1WV0RJbU1KbTdKQWZRdnowbGQyIiwic3ViIjoiV0h0alU3Qk1NVldESW1NSm03SkFmUXZ6MGxkMiIsImlhdCI6MTcxNzAyNzAxMiwiZXhwIjoxNzE3MDMwNjEyLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidmljdG9yQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.vExusAod10TQCGNsRVRh0T5iirxETABS75xWwZ3VChM3QenKd-DWEt51dqHQkNHyDPem2JgnHgDSuUhk_dJ5t35a2IDJNJIKhun6D46BES2w084XDEIXGVDuCsc31jUvBLM7ciuEMrNIAKKY275a5Vfa4txRzN5znSzRZu9Yp3u8-l3ChHgrRll-hyPi8tFDNTTxMl313aBHZjR1d_hcpGGDl4osuOm8gG5PpLgvbvY8ieTZ_oIyqOvTJWYGSlPfFEYGndPIbsi3si5Bshd100eZcprqYBrrrDFhSfqvgL-tQitwPv_QYF5JFKGpdCEM-ADrOzc2hJAeSNJKwbaTjQ`,
+        }
       });
+      console.log(response);
 
       if (response.status === 200 && response.data) {
         setDentistas(response.data);
@@ -96,7 +94,7 @@ const AgendaScreen = () => {
       setLoading(true);
       const response = await axiosInstance.get('/api/consultas', {
         headers: {
-          Authorization: `${token}`,
+          Authorization: `eyJhbGciOiJSUzI1NiIsImtpZCI6IjVkNjE3N2E5Mjg2ZDI1Njg0NTI2OWEzMTM2ZDNmNjY0MjZhNGQ2NDIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHJvamV0by10ZXN0ZS1hNTk0NSIsImF1ZCI6InByb2pldG8tdGVzdGUtYTU5NDUiLCJhdXRoX3RpbWUiOjE3MTcwMjcwMTIsInVzZXJfaWQiOiJXSHRqVTdCTU1WV0RJbU1KbTdKQWZRdnowbGQyIiwic3ViIjoiV0h0alU3Qk1NVldESW1NSm03SkFmUXZ6MGxkMiIsImlhdCI6MTcxNzAyNzAxMiwiZXhwIjoxNzE3MDMwNjEyLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidmljdG9yQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.vExusAod10TQCGNsRVRh0T5iirxETABS75xWwZ3VChM3QenKd-DWEt51dqHQkNHyDPem2JgnHgDSuUhk_dJ5t35a2IDJNJIKhun6D46BES2w084XDEIXGVDuCsc31jUvBLM7ciuEMrNIAKKY275a5Vfa4txRzN5znSzRZu9Yp3u8-l3ChHgrRll-hyPi8tFDNTTxMl313aBHZjR1d_hcpGGDl4osuOm8gG5PpLgvbvY8ieTZ_oIyqOvTJWYGSlPfFEYGndPIbsi3si5Bshd100eZcprqYBrrrDFhSfqvgL-tQitwPv_QYF5JFKGpdCEM-ADrOzc2hJAeSNJKwbaTjQ`,
         },
       });
 
@@ -154,7 +152,7 @@ const AgendaScreen = () => {
       setLoading(true);
       const response = await axiosInstance.post('/api/consulta', consultaData, {
         headers: {
-          Authorization: `${token}`,
+          Authorization: `eyJhbGciOiJSUzI1NiIsImtpZCI6IjVkNjE3N2E5Mjg2ZDI1Njg0NTI2OWEzMTM2ZDNmNjY0MjZhNGQ2NDIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vcHJvamV0by10ZXN0ZS1hNTk0NSIsImF1ZCI6InByb2pldG8tdGVzdGUtYTU5NDUiLCJhdXRoX3RpbWUiOjE3MTcwMjcwMTIsInVzZXJfaWQiOiJXSHRqVTdCTU1WV0RJbU1KbTdKQWZRdnowbGQyIiwic3ViIjoiV0h0alU3Qk1NVldESW1NSm03SkFmUXZ6MGxkMiIsImlhdCI6MTcxNzAyNzAxMiwiZXhwIjoxNzE3MDMwNjEyLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidmljdG9yQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.vExusAod10TQCGNsRVRh0T5iirxETABS75xWwZ3VChM3QenKd-DWEt51dqHQkNHyDPem2JgnHgDSuUhk_dJ5t35a2IDJNJIKhun6D46BES2w084XDEIXGVDuCsc31jUvBLM7ciuEMrNIAKKY275a5Vfa4txRzN5znSzRZu9Yp3u8-l3ChHgrRll-hyPi8tFDNTTxMl313aBHZjR1d_hcpGGDl4osuOm8gG5PpLgvbvY8ieTZ_oIyqOvTJWYGSlPfFEYGndPIbsi3si5Bshd100eZcprqYBrrrDFhSfqvgL-tQitwPv_QYF5JFKGpdCEM-ADrOzc2hJAeSNJKwbaTjQ`,
         },
       });
 

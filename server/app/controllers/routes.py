@@ -460,7 +460,7 @@ def init_routes(app):
             for dentista_especializacao in dentista_especializacoes:
                 dentista_especializacao_data = {
                     'id': dentista_especializacao.especializacao_id,
-                    'dentista': dentista_especializacao.dentista_id,
+                    'dentista': dentista_especializacao.dentista_nome.dentista_nome,
                     'especializacao': dentista_especializacao.especializacao_id,
                 }
                 dentista_especializacoes_list.append(dentista_especializacao_data)
@@ -468,6 +468,19 @@ def init_routes(app):
             return jsonify(dentista_especializacoes_list), 200
         else:
             return jsonify({'message': 'Nenhuma relação encontrada'}), 404
+        
+    @app.route('/api/dentista-especializacao/<int:id>', methods=['GET'])
+    def get_dentista_especializacao(id):
+        dentista_especializacao = DentistaEspecializacao.query.get(id)
+        if dentista_especializacao:
+            dentista_especializacao_id = {
+                'id': dentista_especializacao.especializacao_id,
+                'dentista': dentista_especializacao.dentista_nome.dentista_nome,
+                'especializacao': dentista_especializacao.especializacao_id,
+            }
+            return jsonify(dentista_especializacao_id)
+        else:
+            return jsonify({'error': 'Relação não encontrada'}), 404
         
     @app.route('/api/dentista-especializacao', methods=['POST'])
     @validate_json(schema_dentista_especializacao)
@@ -487,14 +500,6 @@ def init_routes(app):
             return jsonify({"error": str(e)}), 400
 
         return jsonify({"message": "Relação created successfully"}), 201
-    
-    @app.route('/api/dentista-especializacao/<int:id>', methods=['GET'])
-    def get_dentista_especializacao(id):
-        dentista_especializacao = DentistaEspecializacao.query.get(id)
-        if dentista_especializacao:
-            return jsonify(dentista_especializacao)
-        else:
-            return jsonify({'error': 'Relação não encontrada'}), 404
         
     @app.route('/api/dentista-especializacao/<int:id>', methods=['DELETE'])
     def delete_dentista_especializacao(id):
