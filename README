@@ -1,0 +1,22 @@
+# Cadastro e Consulta Odontológica
+
+## Descrição
+
+Este projeto é um sistema de cadastro e consulta odontológica desenvolvido para facilitar a gestão de informações de pacientes em clínicas odontológicas. Com uma interface simples e intuitiva, permite a inserção, atualização e consulta de dados dos pacientes, ajudando os profissionais a manterem um acompanhamento detalhado e eficiente.
+
+## Funcionalidades
+
+- **Cadastro_de_Pacientes:** Permite inserir novos pacientes no sistema com informações detalhadas.
+- **Consulta_de_Pacientes:** Facilita a busca de pacientes cadastrados e visualização de suas informações.
+- **Atualização_de_Dados:** Possibilidade de atualizar os dados dos pacientes conforme necessário.
+- **Interface_Amigável:** Interface gráfica simples e intuitiva, facilitando o uso até mesmo para os menos familiarizados com tecnologia.
+- **Armazenamento_Seguro:** Utilização de banco de dados Firebase para armazenamento das informações dos pacientes, garantindo segurança e integridade dos dados.
+
+## Tecnologias Utilizadas
+
+- **Python:** Linguagem de programação utilizada para desenvolver o sistema.
+- **React_Native:** Framework utilizado para desenvolver a interface gráfica do sistema.
+- **Firebase:** Banco de dados utilizado para armazenar as informações dos pacientes e dentistas.
+- **Expo:** Plataforma utilizada para desenvolver e testar o aplicativo em dispositivos móveis.
+- **Docker:** Ferramenta utilizada para criar, implantar e executar aplicativos em contêineres.
+
