@@ -5,6 +5,8 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import { AuthProvider } from './middleware/AuthContext';
 import MainTabNavigator from './screens/MainTabNavigator'; 
+import DentistLoginScreen from './screens/DentistLoginScreen';
+import DentistMainTabNavigator from './screens/DentistMainTabNavigator';
 
 const Stack = createStackNavigator();
 
@@ -16,6 +18,8 @@ const App = () => {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Main" component={MainTabNavigator} />
+          <Stack.Screen name="DentistLogin" component={DentistLoginScreen} />
+          <Stack.Screen name="DentistMain" component={DentistMainTabNavigator} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

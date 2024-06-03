@@ -5,13 +5,13 @@ import axiosInstance from '../axiosInstance';
 import { AuthContext } from '../middleware/AuthContext';
 import { saveToken, setItem } from '../utils/secureStore';
 
-const LoginScreen = () => {
+const DentistLoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
   const { setToken } = useContext(AuthContext);
 
-  const handleLogin = async () => {
+  const handleDentistLogin = async () => {
     const payload = {
       email: email,
       password: password,
@@ -23,17 +23,17 @@ const LoginScreen = () => {
       if (response.status === 200) {
         const { token, refreshToken, user } = response.data;
 
-        if (user.type === 'dentista') {
-          Alert.alert('Erro', 'Apenas pacientes podem fazer login aqui.');
+        if (user.type === 'paciente') {
+          Alert.alert('Erro', 'Apenas dentistas podem fazer login aqui.');
           return;
         }
 
         await setItem('authToken', token);
         await setItem('refreshToken', refreshToken);
-        await setItem('userId', user.paciente_id.toString());
-        await setItem('userName', user.paciente_nome);
+        await setItem('dentistId', user.dentista_id.toString());
+        await setItem('userName', user.dentista_nome);
         setToken(token);
-        navigation.navigate('Main');
+        navigation.navigate('DentistMain');
       } else {
         Alert.alert('Login Failed', 'Unexpected error occurred');
       }
@@ -46,18 +46,13 @@ const LoginScreen = () => {
     }
   };
 
-  const handleRegister = () => {
-    navigation.navigate('Register');
-  };
-
-  const handleDentistLogin = () => {
-    navigation.navigate('DentistLogin');
+  const handleBack = () => {
+    navigation.navigate('Login');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>DENTISTRY</Text>
-      <Image source={require('../assets/dente.png')} style={styles.image} />
+      <Image source={require('../assets/dentista.png')} style={styles.image} />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -75,14 +70,11 @@ const LoginScreen = () => {
         secureTextEntry
         placeholderTextColor="#ccc"
       />
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleDentistLogin}>
         <Text style={styles.loginButtonText}>LOGIN</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-        <Text style={styles.registerButtonText}>REGISTER</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.dentistButton} onPress={handleDentistLogin}>
-        <Text style={styles.dentistButtonText}>DENTISTA</Text>
+      <TouchableOpacity style={styles.voltarButton} onPress={handleBack}>
+        <Text style={styles.voltarButtonText}>VOLTAR</Text>
       </TouchableOpacity>
     </View>
   );
@@ -125,31 +117,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   loginButtonText: {
-    color: '#8A2BE2',
-    fontWeight: 'bold',
-  },
-  registerButton: {
-    backgroundColor: '#800080',
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  registerButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
-  dentistButton: {
+  voltarButton: {
     backgroundColor: '#DC143C',
     paddingVertical: 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 10,
   },
-  dentistButtonText: {
+  voltarButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
 });
 
-export default LoginScreen;
+export default DentistLoginScreen;

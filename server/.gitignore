@@ -140,3 +140,4 @@ instance/
 app/__pycache__
 app/controllers/__pycache__
 app/models/__pycache__
+app/utils/__pycache__

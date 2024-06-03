@@ -4,54 +4,54 @@ import { useFocusEffect } from '@react-navigation/native';
 import axiosInstance from '../axiosInstance';
 import { getItem } from '../utils/secureStore';
 
-const HorariosMarcadosScreen = () => {
+const DentistAppointmentsScreen = () => {
   const [loading, setLoading] = useState(true);
-  const [horariosMarcados, setHorariosMarcados] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [token, setToken] = useState(null);
-  const [userId, setUserId] = useState(null);
+  const [dentistId, setDentistId] = useState(null);
 
   useEffect(() => {
-    const fetchTokenAndUserId = async () => {
+    const fetchTokenAndDentistId = async () => {
       try {
         const storedToken = await getItem('authToken');
-        const storedUserId = await getItem('userId');
+        const storedDentistId = await getItem('dentistId');
 
-        if (storedToken && storedUserId) {
+        if (storedToken && storedDentistId) {
           setToken(storedToken);
-          setUserId(storedUserId);
+          setDentistId(storedDentistId);
         } else {
-          Alert.alert('Erro', 'Token ou ID do usuário não encontrado');
+          Alert.alert('Erro', 'Token ou ID do dentista não encontrado');
           setLoading(false);
         }
       } catch (error) {
-        console.error('Falha ao carregar o token ou ID do usuário:', error);
-        Alert.alert('Erro', 'Falha ao carregar o token ou ID do usuário');
+        console.error('Falha ao carregar o token ou ID do dentista:', error);
+        Alert.alert('Erro', 'Falha ao carregar o token ou ID do dentista');
         setLoading(false);
       }
     };
 
-    fetchTokenAndUserId();
+    fetchTokenAndDentistId();
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      if (token && userId) {
-        fetchHorariosMarcados(token, userId);
+      if (token && dentistId) {
+        fetchAppointments(token, dentistId);
       }
-    }, [token, userId])
+    }, [token, dentistId])
   );
 
-  const fetchHorariosMarcados = async (token, userId) => {
+  const fetchAppointments = async (token, dentistId) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`/api/consulta/${userId}`, {
+      const response = await axiosInstance.get(`/api/dentista/${dentistId}/agendamentos`, {
         headers: {
           Authorization: `${token}`,
         },
       });
 
       if (response.status === 200 && response.data) {
-        setHorariosMarcados(response.data);
+        setAppointments(response.data);
       } else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }
@@ -66,12 +66,12 @@ const HorariosMarcadosScreen = () => {
     }
   };
 
-  const renderHorario = ({ item }) => (
-    <View style={styles.horarioContainer}>
-      <Text style={styles.horarioText}>{`Data: ${item.data_consulta}`}</Text>
-      <Text style={styles.horarioText}>{`Hora: ${item.hora_consulta}`}</Text>
-      <Text style={styles.horarioText}>{`Dentista: ${item.dentista}`}</Text>
-      <Text style={styles.horarioText}>{`Especialização: ${item.especializacao}`}</Text>
+  const renderAppointment = ({ item }) => (
+    <View style={styles.appointmentContainer}>
+      <Text style={styles.appointmentText}>{`Data: ${item.data_consulta}`}</Text>
+      <Text style={styles.appointmentText}>{`Hora: ${item.hora_consulta}`}</Text>
+      <Text style={styles.appointmentText}>{`Paciente ID: ${item.paciente_id}`}</Text>
+      <Text style={styles.appointmentText}>{`Especialização ID: ${item.dent_esp_id}`}</Text>
     </View>
   );
 
@@ -81,9 +81,9 @@ const HorariosMarcadosScreen = () => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <FlatList
-          data={horariosMarcados}
-          renderItem={renderHorario}
-          keyExtractor={(item) => item.id.toString()}
+          data={appointments}
+          renderItem={renderAppointment}
+          keyExtractor={(item) => item.agenda_id.toString()}
           ListEmptyComponent={<Text>Nenhum horário marcado</Text>}
         />
       )}
@@ -97,14 +97,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
   },
-  horarioContainer: {
+  appointmentContainer: {
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
-  horarioText: {
+  appointmentText: {
     fontSize: 16,
   },
 });
 
-export default HorariosMarcadosScreen;
+export default DentistAppointmentsScreen;

@@ -1,23 +1,23 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import ProfileScreen from './ProfileScreen';
-import HomeScreen from './HomeScreen';
-import HorariosMarcadosScreen from './HorariosMarcadosScreen'; // Assumindo que você tenha esta tela
+import DentistAppointmentsScreen from './DentistAppointmentsScreen';
+import DentistSpecialtyScreen from './DentistSpecialtyScreen';
+import DentistProfileScreen from './DentistProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
-const MainTabNavigator = () => {
+const DentistMainTabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'Agenda') {
+          if (route.name === 'Horários Marcados') {
             iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'Horários Marcados') {
-            iconName = focused ? 'time' : 'time-outline';
+          } else if (route.name === 'Especialidade') {
+            iconName = focused ? 'medkit' : 'medkit-outline';
           } else if (route.name === 'Perfil') {
             iconName = focused ? 'person-circle' : 'person-circle-outline';
           }
@@ -31,11 +31,11 @@ const MainTabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Agenda" component={HomeScreen} />
-      <Tab.Screen name="Horários Marcados" component={HorariosMarcadosScreen} />
-      <Tab.Screen name="Perfil" component={ProfileScreen} />
+      <Tab.Screen name="Horários Marcados" component={DentistAppointmentsScreen} />
+      <Tab.Screen name="Especialidade" component={DentistSpecialtyScreen} />
+      <Tab.Screen name="Perfil" component={DentistProfileScreen} />
     </Tab.Navigator>
   );
 };
 
-export default MainTabNavigator;
+export default DentistMainTabNavigator;
