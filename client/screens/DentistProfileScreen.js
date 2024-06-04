@@ -82,15 +82,19 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   profileContainer: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 15,
+    marginVertical: 10,
     borderRadius: 10,
-    padding: 20,
+    width: '100%',
+    backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
     elevation: 5,
+    alignItems: 'center',
   },
   profileImage: {
     width: 100,
@@ -102,13 +106,12 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#8A2BE2',
-    marginBottom: 8,
+    color: '#800080',
   },
   profileEmail: {
     fontSize: 18,
-    color: '#555',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

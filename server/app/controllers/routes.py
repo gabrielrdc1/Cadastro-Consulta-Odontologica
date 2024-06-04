@@ -22,7 +22,7 @@ def init_routes(app):
         if request.endpoint not in ['login', 'create_paciente']:
             if request.endpoint in ['create_dentista_especializacao', 'get_consultas']:
                 return verify_token(usuario=False)
-            return verify_token()
+            return verify_token() 
 
          
     @app.route('/api/pacientes', methods=['POST'])
@@ -194,7 +194,8 @@ def init_routes(app):
             especializacao = DentistaEspecializacao.query.filter_by(dent_espec_id=consulta.dent_esp_id).first()
             if especializacao:
                 hora_inicio = consulta.hora_consulta
-                hora_fim = (datetime.combine(datetime.today(), hora_inicio) + timedelta(minutes=especializacao.tempo)).time()
+                tempo_especialidade = especializacao.tempo
+                hora_fim = (datetime.combine(datetime.today(), hora_inicio) + timedelta(minutes=tempo_especialidade)).time()
                 current_time = hora_inicio
                 while current_time < hora_fim:
                     occupied_slots.append(current_time)
@@ -237,7 +238,9 @@ def init_routes(app):
         ).join(DentistaEspecializacao, Agenda.dent_esp_id == DentistaEspecializacao.dent_espec_id)\
         .join(Dentistas, DentistaEspecializacao.dentista_id == Dentistas.dentista_id)\
         .join(Especializacao, DentistaEspecializacao.especializacao_id == Especializacao.especializacao_id)\
-        .filter(Agenda.paciente_id == id).all()
+        .filter(Agenda.paciente_id == id)\
+        .order_by(Agenda.data_consulta.asc(), Agenda.hora_consulta.asc())\
+        .all()
 
         consulta_list = []
         if consultas:
@@ -254,8 +257,6 @@ def init_routes(app):
             return jsonify(consulta_list), 200
         else:
             return jsonify({'error': 'Consulta não encontrada'}), 404
-
-
         
     @app.route('/api/consulta', methods=['POST'])
     def create_consulta():
@@ -308,10 +309,28 @@ def init_routes(app):
                 return jsonify({'error': 'Dentista não encontrado'}), 404
 
             especializacoes_ids = [esp.dent_espec_id for esp in dentista.especializacoes]
-            
-            agendamentos = Agenda.query.filter(Agenda.dent_esp_id.in_(especializacoes_ids)).all()
 
-            agendamentos_list = [agendamento.to_dict() for agendamento in agendamentos]
+            agendamentos = db.session.query(
+                Agenda.agenda_id,
+                Pacientes.paciente_nome,
+                Especializacao.especializacao_nome,
+                Agenda.data_consulta,
+                Agenda.hora_consulta
+            ).join(Pacientes, Agenda.paciente_id == Pacientes.paciente_id)\
+            .join(DentistaEspecializacao, Agenda.dent_esp_id == DentistaEspecializacao.dent_espec_id)\
+            .join(Especializacao, DentistaEspecializacao.especializacao_id == Especializacao.especializacao_id)\
+            .filter(Agenda.dent_esp_id.in_(especializacoes_ids)).all()
+
+            agendamentos_list = []
+            for agendamento in agendamentos:
+                agendamento_data = {
+                    'id': agendamento.agenda_id,
+                    'usuario': agendamento.paciente_nome,
+                    'especializacao': agendamento.especializacao_nome,
+                    'data_consulta': agendamento.data_consulta.strftime('%Y-%m-%d'),
+                    'hora_consulta': agendamento.hora_consulta.strftime('%H:%M:%S')
+                }
+                agendamentos_list.append(agendamento_data)
 
             return jsonify(agendamentos_list), 200
         except Exception as e:
@@ -498,6 +517,22 @@ def init_routes(app):
         
         else:
             return jsonify({'error': 'Especialização não encontrada'}), 404
+       
+    @app.route('/api/especializacao/<int:especializacao_id>/dentista/<int:dentista_id>', methods=['GET'])
+    def get_especializacao_dentista(especializacao_id, dentista_id):
+        especializacao = DentistaEspecializacao.query.filter_by(especializacao_id=especializacao_id, dentista_id=dentista_id).first()
+        if especializacao:
+            especializacao_data = {
+                'dent_espec_id': especializacao.dent_espec_id,
+                'dentista_nome': especializacao.dentista_nome.dentista_nome,
+                'dentista_id': especializacao.dentista_id,
+                'especializacao_id': especializacao.especializacao_id,
+                'tempo': especializacao.tempo,
+            }
+            return jsonify(especializacao_data)
+        else:
+            return jsonify({'error': 'Especialização não encontrada para o dentista especificado'}), 404
+    
         
     @app.route('/api/dentista-especializacoes', methods=['GET'])
     def get_dentista_especializacoes():

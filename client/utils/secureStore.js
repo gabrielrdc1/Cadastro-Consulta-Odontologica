@@ -1,4 +1,3 @@
-// secureStore.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const setItem = async (key, value) => {

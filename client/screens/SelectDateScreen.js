@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, Button } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Calendar } from 'react-native-calendars';
 import axiosInstance from '../axiosInstance';
@@ -42,36 +42,65 @@ const SelectDateScreen = ({ dentEspId, token, onSelectDate }) => {
     fetchHorariosDisponiveis(day.dateString);
   };
 
+  const formatDate = (dateString) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('pt-BR', options);
+  };
+
+  const renderDay = (day) => {
+    const dayOfWeek = new Date(day.dateString).getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      return <View style={styles.hiddenDay} />;
+    }
+    return (
+      <TouchableOpacity onPress={() => handleDayPress(day)} style={styles.dayContainer}>
+        <Text style={styles.dayText}>{day.day}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#DC143C" />
       ) : (
-        <View>
-          <Calendar
-            onDayPress={handleDayPress}
-            markedDates={{ [selectedDate]: { selected: true, marked: true } }}
-            theme={{
-              selectedDayBackgroundColor: '#00adf5',
-              todayTextColor: '#00adf5',
-              dotColor: '#00adf5',
-              selectedDotColor: '#ffffff',
-              arrowColor: 'orange',
-              monthTextColor: 'purple',
-            }}
-          />
+        <View style={styles.innerContainer}>
+          <View style={styles.calendarContainer}>
+            <Calendar
+              onDayPress={handleDayPress}
+              markedDates={{ [selectedDate]: { selected: true, marked: true } }}
+              theme={{
+                selectedDayBackgroundColor: '#800080',
+                todayTextColor: '#DC143C',
+                dotColor: '#800080',
+                selectedDotColor: '#ffffff',
+                arrowColor: '#DC143C',
+                monthTextColor: '#800080',
+              }}
+              dayComponent={({ date, state }) => renderDay(date)}
+            />
+          </View>
           {selectedDate && (
             <View>
-              <Text style={styles.label}>Horários Disponíveis para {selectedDate}</Text>
-              <Picker
-                selectedValue={horaConsulta}
-                onValueChange={(itemValue) => setHoraConsulta(itemValue)}
+              <Text style={styles.label}>Horários Disponíveis para {formatDate(selectedDate)}</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={horaConsulta}
+                  onValueChange={(itemValue) => setHoraConsulta(itemValue)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {horariosDisponiveis.map((horario) => (
+                    <Picker.Item key={horario} label={horario} value={horario} />
+                  ))}
+                </Picker>
+              </View>
+              <TouchableOpacity 
+                style={styles.button} 
+                onPress={() => onSelectDate(`${selectedDate} ${horaConsulta}`)}
               >
-                {horariosDisponiveis.map((horario) => (
-                  <Picker.Item key={horario} label={horario} value={horario} />
-                ))}
-              </Picker>
-              <Button title="Confirmar" onPress={() => onSelectDate(`${selectedDate} ${horaConsulta}`)} />
+                <Text style={styles.buttonText}>Confirmar</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -84,11 +113,67 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    padding: 0,
+    backgroundColor: '#7cc5bd',
+  },
+  innerContainer: {
+    flex: 1,
+    justifyContent: 'center',
     padding: 16,
+  },
+  calendarContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    padding: 10,
+    marginBottom: 5,
   },
   label: {
     fontSize: 16,
     marginBottom: 8,
+    color: '#080000',
+    padding: 5,
+  },
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+  },
+  pickerItem: {
+    fontSize: 16,
+    color: '#800080',
+  },
+  button: {
+    backgroundColor: '#800080',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 13,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  dayContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 32,
+    height: 32,
+    borderRadius: 16, 
+    overflow: 'hidden', 
+  },
+  dayText: {
+    color: '#000',
+    fontSize: 16,
+  },
+  hiddenDay: {
+    width: 32,
+    height: 32,
+    backgroundColor: 'transparent',
   },
 });
 

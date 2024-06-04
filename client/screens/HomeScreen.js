@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button, StyleSheet, Text, Alert, ActivityIndicator } from 'react-native';
+import { View, Button, StyleSheet, Text, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import axiosInstance from '../axiosInstance';
 import SelectSpecialtyScreen from './SelectSpecialtyScreen';
 import SelectDentistScreen from './SelectDentistScreen';
@@ -10,6 +10,7 @@ const HomeScreen = () => {
   const [stage, setStage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [especializacaoId, setEspecializacaoId] = useState('');
+  const [dentId, setDentId] = useState('');
   const [dentEspId, setDentEspId] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [horaConsulta, setHoraConsulta] = useState('');
@@ -37,29 +38,56 @@ const HomeScreen = () => {
     fetchTokenAndUserId();
   }, []);
 
-  const handleNextStage = (data) => {
+  const handleNextStage = async (data) => {
     if (stage === 1) {
       setEspecializacaoId(data);
       setStage(2);
     } else if (stage === 2) {
-      setDentEspId(data);
+      setDentId(data);
       setStage(3);
     } else if (stage === 3) {
       const [date, time] = data.split(' ');
-      const formattedDate = date; // Mantém o formato YYYY-MM-DD
-      const formattedTime = `${time}:00`; // Adiciona segundos para o formato HH:MM:SS
+      const formattedDate = date; 
+      const formattedTime = `${time}:00`; 
       setSelectedDate(formattedDate);
       setHoraConsulta(formattedTime);
-      handleCreateConsulta(formattedDate, formattedTime);
+      await handleDentEspecId(especializacaoId, dentId, formattedDate, formattedTime);
     }
   };
 
-  const handleCreateConsulta = async (date, time) => {
+  const formatDate = (dateString) => {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('pt-BR', options);
+  };
+
+  const handleDentEspecId = async (especializacaoId, dentId, date, time) => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get(`/api/especializacao/${especializacaoId}/dentista/${dentId}`, {
+        headers: {
+          Authorization: `${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        setDentEspId(response.data.dent_espec_id);
+        handleCreateConsulta(response.data.dent_espec_id, date, time);
+      } else {
+        Alert.alert('Erro', 'Erro ao buscar a especialização do dentista');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar especialização do dentista:', error);
+      Alert.alert('Erro', 'Erro ao buscar a especialização do dentista');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleCreateConsulta = async (dentEspId, date, time) => {
     if (!userId || !dentEspId || !date || !time) {
       Alert.alert('Erro', 'Dados incompletos para agendamento.');
       return;
     }
-
     setLoading(true);
     try {
       const payload = {
@@ -68,7 +96,6 @@ const HomeScreen = () => {
         data_consulta: date,
         hora_consulta: time,
       };
-      console.log('Creating consultation with:', payload);
 
       const response = await axiosInstance.post('/api/consulta', payload, {
         headers: {
@@ -78,7 +105,6 @@ const HomeScreen = () => {
       });
 
       if (response.status === 201) {
-        Alert.alert('Sucesso', 'Consulta agendada com sucesso');
         setStage(4);
       } else {
         Alert.alert('Erro', 'Erro ao agendar a consulta');
@@ -98,16 +124,18 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#DC143C" />
       ) : (
         <>
           {stage === 1 && <SelectSpecialtyScreen onSelectSpecialty={handleNextStage} />}
           {stage === 2 && <SelectDentistScreen especializacaoId={especializacaoId} onSelectDentist={handleNextStage} />}
           {stage === 3 && <SelectDateScreen dentEspId={dentEspId} token={token} onSelectDate={handleNextStage} />}
           {stage === 4 && (
-            <View>
-              <Text>Consulta agendada para {selectedDate} às {horaConsulta}!</Text>
-              <Button title="Voltar ao Início" onPress={() => setStage(1)} />
+            <View style={styles.confirmationContainer}>
+              <Text style={styles.confirmationText}>Consulta agendada para {formatDate(selectedDate)} às {horaConsulta}!</Text>
+              <TouchableOpacity style={styles.button} onPress={() => setStage(1)}>
+                <Text style={styles.buttonText}>Voltar ao Início</Text>
+              </TouchableOpacity>
             </View>
           )}
         </>
@@ -121,6 +149,28 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: '#7cc5bd',
+  },
+  confirmationContainer: {
+    alignItems: 'center',
+  },
+  confirmationText: {
+    fontSize: 30,
+    marginBottom: 20,
+    color: '#080000',
+    textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#800080',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

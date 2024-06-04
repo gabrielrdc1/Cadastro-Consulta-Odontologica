@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, Button } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axiosInstance from '../axiosInstance';
 import { getItem } from '../utils/secureStore';
@@ -57,19 +57,28 @@ const SelectDentistScreen = ({ especializacaoId, onSelectDentist }) => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#DC143C" />
       ) : (
-        <View>
+        <View style={styles.innerContainer}>
           <Text style={styles.label}>Selecione um Dentista</Text>
-          <Picker
-            selectedValue={dentEspId}
-            onValueChange={(itemValue) => setDentEspId(itemValue)}
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={dentEspId}
+              onValueChange={(itemValue) => setDentEspId(itemValue)}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+            >
+              {dentistas.map((dentista) => (
+                <Picker.Item key={dentista.id} label={dentista.dentista} value={dentista.id} />
+              ))}
+            </Picker>
+          </View>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => onSelectDentist(dentEspId)}
           >
-            {dentistas.map((dentista) => (
-              <Picker.Item key={dentista.id} label={dentista.dentista} value={dentista.id} />
-            ))}
-          </Picker>
-          <Button title="Próximo" onPress={() => onSelectDentist(dentEspId)} />
+            <Text style={styles.buttonText}>Próximo</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -80,11 +89,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    padding: 0,
+    backgroundColor: '#7cc5bd',
+  },
+  innerContainer: {
     padding: 16,
+    backgroundColor: '#7cc5bd',
   },
   label: {
     fontSize: 16,
     marginBottom: 8,
+    color: '#080000',
+  },
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  picker: {
+    height: 50,
+  },
+  pickerItem: {
+    fontSize: 16,
+    color: '#800080', 
+  },
+  button: {
+    backgroundColor: '#800080',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

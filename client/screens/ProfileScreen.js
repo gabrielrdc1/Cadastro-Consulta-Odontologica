@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, Image, Button } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, Image } from 'react-native';
 import axiosInstance from '../axiosInstance';
-import { getItem } from '../utils/secureStore'; 
+import { getItem } from '../utils/secureStore';
 
 const ProfileScreen = () => {
   const [paciente, setPaciente] = useState(null);
@@ -62,22 +62,15 @@ const ProfileScreen = () => {
         style={styles.profileImage} 
       />
       <Text style={styles.name}>{paciente.nome}</Text>
-      <Text style={styles.label}>ID: {paciente.id}</Text>
       <Text style={styles.label}>CPF: {paciente.cpf}</Text>
       <Text style={styles.label}>Email: {paciente.email}</Text>
-      <Text style={styles.label}>Data de Criação: {paciente.data_criacao}</Text>
-      <Text style={styles.label}>Ativo: {paciente.ativo}</Text>
-      <Button
-        title="Editar Perfil"
-        onPress={() => Alert.alert('Editar Perfil', 'Funcionalidade em desenvolvimento')}
-      />
     </View>
   );
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#DC143C" />
       </View>
     );
   }
@@ -99,7 +92,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#7cc5bd',
   },
   pacienteContainer: {
     borderWidth: 1,
@@ -114,7 +107,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
-    alignItems: 'center', // Center the content
+    alignItems: 'center',
   },
   profileImage: {
     width: 150,
@@ -126,11 +119,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#800080',
   },
   label: {
     fontSize: 16,
     marginVertical: 5,
     color: '#333',
+  },
+  emptyText: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#DC143C',
+    marginTop: 20,
   },
 });
 

@@ -78,13 +78,13 @@ const HorariosMarcadosScreen = () => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#DC143C" />
       ) : (
         <FlatList
           data={horariosMarcados}
           renderItem={renderHorario}
           keyExtractor={(item) => item.id.toString()}
-          ListEmptyComponent={<Text>Nenhum horário marcado</Text>}
+          ListEmptyComponent={<Text style={styles.emptyText}>Nenhum horário marcado</Text>}
         />
       )}
     </View>
@@ -96,14 +96,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: '#7cc5bd',
   },
   horarioContainer: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    marginVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderLeftWidth: 5,
+    borderLeftColor: '#800080',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
   horarioText: {
     fontSize: 16,
+    color: '#333',
+  },
+  emptyText: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#DC143C',
+    marginTop: 20,
   },
 });
 

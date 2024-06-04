@@ -51,7 +51,8 @@ const DentistAppointmentsScreen = () => {
       });
 
       if (response.status === 200 && response.data) {
-        setAppointments(response.data);
+        const data = response.data.map((item, index) => ({ ...item, key: index.toString() }));
+        setAppointments(data);
       } else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }
@@ -70,8 +71,8 @@ const DentistAppointmentsScreen = () => {
     <View style={styles.appointmentContainer}>
       <Text style={styles.appointmentText}>{`Data: ${item.data_consulta}`}</Text>
       <Text style={styles.appointmentText}>{`Hora: ${item.hora_consulta}`}</Text>
-      <Text style={styles.appointmentText}>{`Paciente ID: ${item.paciente_id}`}</Text>
-      <Text style={styles.appointmentText}>{`Especialização ID: ${item.dent_esp_id}`}</Text>
+      <Text style={styles.appointmentText}>{`Paciente: ${item.usuario}`}</Text>
+      <Text style={styles.appointmentText}>{`Especialização: ${item.especializacao}`}</Text>
     </View>
   );
 
@@ -83,8 +84,8 @@ const DentistAppointmentsScreen = () => {
         <FlatList
           data={appointments}
           renderItem={renderAppointment}
-          keyExtractor={(item) => item.agenda_id.toString()}
-          ListEmptyComponent={<Text>Nenhum horário marcado</Text>}
+          keyExtractor={(item) => item.key}
+          ListEmptyComponent={<Text style={styles.emptyText}> Nenhum horário marcado</Text>}
         />
       )}
     </View>
@@ -96,14 +97,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: '#7cc5bd',
   },
   appointmentContainer: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    marginVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderLeftWidth: 5,
+    borderLeftColor: '#800080',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
   appointmentText: {
     fontSize: 16,
+    color: '#333',
+  },
+  emptyText: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#DC143C',
+    marginTop: 20,
   },
 });
 
