@@ -40,7 +40,10 @@ const SelectDentistScreen = ({ especializacaoId, onSelectDentist }) => {
       });
       if (response.status === 200 && response.data) {
         setDentistas(response.data);
-      } else {
+      } if (response.status === 404) {
+        setDentistas([]);
+      }
+      else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }
     } catch (error) {

@@ -20,7 +20,7 @@ const DentistSpecialtyScreen = () => {
           setDentistId(storedDentistId);
           fetchSpecialties(storedToken, storedDentistId);
         } else {
-          Alert.alert('Erro', 'Token ou ID do dentista não encontrado');
+          Alert.alert('Erro', 'Usuário não encontrado');
           setLoading(false);
         }
       } catch (error) {
@@ -44,6 +44,8 @@ const DentistSpecialtyScreen = () => {
 
       if (response.status === 200 && response.data) {
         setSpecialties(response.data);
+      } if (response.status === 404) {
+        setSpecialties([]);
       } else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }

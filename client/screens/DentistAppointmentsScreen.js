@@ -20,7 +20,7 @@ const DentistAppointmentsScreen = () => {
           setToken(storedToken);
           setDentistId(storedDentistId);
         } else {
-          Alert.alert('Erro', 'Token ou ID do dentista não encontrado');
+          Alert.alert('Erro', 'Usuário não encontrado');
           setLoading(false);
         }
       } catch (error) {
@@ -53,6 +53,9 @@ const DentistAppointmentsScreen = () => {
       if (response.status === 200 && response.data) {
         const data = response.data.map((item, index) => ({ ...item, key: index.toString() }));
         setAppointments(data);
+      } 
+      if (response.status === 404) {
+        setAppointments([]);
       } else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }

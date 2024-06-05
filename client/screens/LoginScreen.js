@@ -34,7 +34,10 @@ const LoginScreen = () => {
         await setItem('userName', user.paciente_nome);
         setToken(token);
         navigation.navigate('Main');
-      } else {
+      } if (response.status === 401) {
+        Alert.alert('Erro', 'Email ou senha inválidos');
+      }
+      else {
         Alert.alert('Login Failed', 'Unexpected error occurred');
       }
     } catch (error) {

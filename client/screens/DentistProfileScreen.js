@@ -20,7 +20,7 @@ const DentistProfileScreen = () => {
           setDentistId(storedDentistId);
           fetchProfile(storedToken, storedDentistId);
         } else {
-          Alert.alert('Erro', 'Token ou ID do dentista não encontrado');
+          Alert.alert('Erro', 'Usuário não encontrado');
           setLoading(false);
         }
       } catch (error) {
@@ -44,6 +44,9 @@ const DentistProfileScreen = () => {
 
       if (response.status === 200 && response.data) {
         setProfile(response.data);
+      }
+      if (response.status === 404) {
+        setProfile({});
       } else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }

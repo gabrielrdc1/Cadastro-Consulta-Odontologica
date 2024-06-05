@@ -30,8 +30,11 @@ const RegisterScreen = () => {
       if (response.status === 201) {
         Alert.alert('Cadastro realizado com sucesso');
         navigation.replace('Login');
-      } else {
-        Alert.alert('Registration Failed', 'Unexpected error occurred');
+      } if (response.status === 400) {
+        Alert.alert('Erro', 'CPF ou email já cadastrado');
+      }
+      else {
+        Alert.alert('Registration Failed');
       }
     } catch (error) {
       if (error.response) {
@@ -89,10 +92,10 @@ const RegisterScreen = () => {
         onSubmitEditing={handleRegister}
       />
       <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-        <Text style={styles.registerButtonText}>REGISTER</Text>
+        <Text style={styles.registerButtonText}>REGISTRAR</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-        <Text style={styles.backButtonText}>BACK</Text>
+        <Text style={styles.backButtonText}>VOLTAR</Text>
       </TouchableOpacity>
     </View>
   );

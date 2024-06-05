@@ -20,7 +20,7 @@ const HorariosMarcadosScreen = () => {
           setToken(storedToken);
           setUserId(storedUserId);
         } else {
-          Alert.alert('Erro', 'Token ou ID do usuário não encontrado');
+          Alert.alert('Erro', 'Usuário não encontrado');
           setLoading(false);
         }
       } catch (error) {
@@ -52,6 +52,9 @@ const HorariosMarcadosScreen = () => {
 
       if (response.status === 200 && response.data) {
         setHorariosMarcados(response.data);
+      } if(response.status === 404) {
+        setHorariosMarcados([]);
+      
       } else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }

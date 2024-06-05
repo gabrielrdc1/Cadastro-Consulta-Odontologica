@@ -23,7 +23,10 @@ const SelectDateScreen = ({ dentEspId, token, onSelectDate }) => {
 
       if (response.status === 200 && response.data) {
         setHorariosDisponiveis(response.data.available_slots);
-      } else {
+      } if (response.status === 404) {
+        setHorariosDisponiveis([]);
+      }
+      else {
         Alert.alert('Erro', 'Formato de resposta inesperado');
       }
     } catch (error) {

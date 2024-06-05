@@ -18,7 +18,7 @@ const ProfileScreen = () => {
           setUserId(storedUserId);
           fetchPaciente(storedUserId, token);
         } else {
-          Alert.alert('Erro', 'Token ou ID do usuário não encontrado');
+          Alert.alert('Erro', 'Usuário não encontrado');
           setLoading(false);
         }
       } catch (error) {

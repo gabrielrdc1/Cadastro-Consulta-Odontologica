@@ -34,7 +34,10 @@ const DentistLoginScreen = () => {
         await setItem('userName', user.dentista_nome);
         setToken(token);
         navigation.navigate('DentistMain');
-      } else {
+      } if (response.status === 401) {
+        Alert.alert('Erro', 'Email ou senha inválidos');
+      }
+      else {
         Alert.alert('Login Failed', 'Unexpected error occurred');
       }
     } catch (error) {

@@ -27,7 +27,7 @@ const HomeScreen = () => {
           setToken(storedToken);
           setUserId(storedUserId);
         } else {
-          Alert.alert('Erro', 'Token ou ID do usuário não encontrado');
+          Alert.alert('Erro', 'Usuário não encontrado');
         }
       } catch (error) {
         console.error('Falha ao carregar o token ou ID do usuário:', error);
