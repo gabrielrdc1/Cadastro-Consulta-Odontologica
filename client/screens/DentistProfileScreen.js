@@ -47,9 +47,7 @@ const DentistProfileScreen = () => {
       }
       if (response.status === 404) {
         setProfile({});
-      } else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
-      }
+      } 
     } catch (error) {
       if (error.response) {
         Alert.alert('Erro', `Falha ao buscar perfil: ${error.response.data.error}`);

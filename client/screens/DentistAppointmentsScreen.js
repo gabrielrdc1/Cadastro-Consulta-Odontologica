@@ -56,8 +56,6 @@ const DentistAppointmentsScreen = () => {
       } 
       if (response.status === 404) {
         setAppointments([]);
-      } else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
       }
     } catch (error) {
       if (error.response) {

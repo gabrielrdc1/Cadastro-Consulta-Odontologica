@@ -37,9 +37,6 @@ const LoginScreen = () => {
       } if (response.status === 401) {
         Alert.alert('Erro', 'Email ou senha inválidos');
       }
-      else {
-        Alert.alert('Login Failed', 'Unexpected error occurred');
-      }
     } catch (error) {
       if (error.response) {
         Alert.alert('Login Failed', `Error: ${error.response.data.error}`);

@@ -26,9 +26,6 @@ const SelectDateScreen = ({ dentEspId, token, onSelectDate }) => {
       } if (response.status === 404) {
         setHorariosDisponiveis([]);
       }
-      else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
-      }
     } catch (error) {
       if (error.response) {
         Alert.alert('Erro', `Falha ao buscar horários: ${error.response.data.error}`);

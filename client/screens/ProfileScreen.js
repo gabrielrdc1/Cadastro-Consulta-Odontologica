@@ -41,8 +41,6 @@ const ProfileScreen = () => {
 
       if (response.status === 200 && response.data) {
         setPaciente(response.data);
-      } else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
       }
     } catch (error) {
       if (error.response) {

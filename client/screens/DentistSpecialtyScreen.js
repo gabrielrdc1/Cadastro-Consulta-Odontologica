@@ -46,8 +46,6 @@ const DentistSpecialtyScreen = () => {
         setSpecialties(response.data);
       } if (response.status === 404) {
         setSpecialties([]);
-      } else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
       }
     } catch (error) {
       if (error.response) {

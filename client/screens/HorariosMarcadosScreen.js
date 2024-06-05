@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import axiosInstance from '../axiosInstance';
 import { getItem } from '../utils/secureStore';
@@ -20,12 +20,11 @@ const HorariosMarcadosScreen = () => {
           setToken(storedToken);
           setUserId(storedUserId);
         } else {
-          Alert.alert('Erro', 'Usuário não encontrado');
+          console.error('Erro: Usuário não encontrado');
           setLoading(false);
         }
       } catch (error) {
         console.error('Falha ao carregar o token ou ID do usuário:', error);
-        Alert.alert('Erro', 'Falha ao carregar o token ou ID do usuário');
         setLoading(false);
       }
     };
@@ -52,17 +51,14 @@ const HorariosMarcadosScreen = () => {
 
       if (response.status === 200 && response.data) {
         setHorariosMarcados(response.data);
-      } if(response.status === 404) {
+      } else if (response.status === 404) {
         setHorariosMarcados([]);
-      
-      } else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
       }
     } catch (error) {
       if (error.response) {
-        Alert.alert('Erro', `Falha ao buscar horários: ${error.response.data.error}`);
+        console.error(`Falha ao buscar horários: ${error.response.data.error}`);
       } else {
-        Alert.alert('Erro', `Falha ao buscar horários: ${error.message}`);
+        console.error(`Falha ao buscar horários: ${error.message}`);
       }
     } finally {
       setLoading(false);

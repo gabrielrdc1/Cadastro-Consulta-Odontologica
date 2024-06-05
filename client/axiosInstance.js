@@ -2,7 +2,7 @@ import axios from 'axios';
 import { BACKEND_URL } from '@env';
 
 const axiosInstance = axios.create({
-  baseURL: BACKEND_URL,
+  baseURL: 'https://cadastro-consulta-odontologica-svbq.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },

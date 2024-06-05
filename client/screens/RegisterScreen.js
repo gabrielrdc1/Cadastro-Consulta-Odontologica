@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { useNavigation } from '@react-navigation/native';
 import axiosInstance from '../axiosInstance';
 import { AuthContext } from '../middleware/AuthContext';
+import { TextInputMask } from 'react-native-masked-text';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
@@ -12,35 +13,54 @@ const RegisterScreen = () => {
   const navigation = useNavigation();
   const { setToken } = useContext(AuthContext);
 
-  const cpfRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
+  const validateCpf = (cpf) => {
+    const cpfPattern = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+    return cpfPattern.test(cpf);
+  };
+
+  const validateEmail = (email) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  };
+
   const handleRegister = async () => {
+    if (!validateCpf(cpf)) {
+      Alert.alert('Dados incorretos', 'CPF está incorreto');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      Alert.alert('Dados incorretos', 'Email está incorreto');
+      return;
+    }
+
+    const formattedCpf = cpf.replace(/[^\d]/g, '');
+
     const payload = {
       paciente_nome: name,
-      cpf: cpf,
+      cpf: formattedCpf,
       email: email,
       password: password,
     };
 
     try {
       const response = await axiosInstance.post('/api/pacientes', payload);
-
       if (response.status === 201) {
         Alert.alert('Cadastro realizado com sucesso');
         navigation.replace('Login');
-      } if (response.status === 400) {
+      } else if (response.status === 400) {
         Alert.alert('Erro', 'CPF ou email já cadastrado');
-      }
-      else {
-        Alert.alert('Registration Failed');
+      } else {
+        Alert.alert('Falha no cadastro');
       }
     } catch (error) {
       if (error.response) {
-        Alert.alert('Registration Failed', `Error: ${error.response.data.error}`);
+        Alert.alert('Falha no cadastro', `Erro: ${error.response.data.error}`);
       } else {
-        Alert.alert('Registration Failed', `Error: ${error.message}`);
+        Alert.alert('Falha no cadastro', `Erro: ${error.message}`);
       }
     }
   };
@@ -53,22 +73,20 @@ const RegisterScreen = () => {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Name"
+        placeholder="Nome"
         value={name}
         onChangeText={setName}
         autoCapitalize="words"
         placeholderTextColor="#ccc"
-        onSubmitEditing={() => cpfRef.current.focus()}
       />
-      <TextInput
-        ref={cpfRef}
-        style={styles.input}
-        placeholder="CPF"
+      <TextInputMask
+        type={'cpf'}
         value={cpf}
         onChangeText={setCpf}
+        style={styles.input}
+        placeholder="CPF"
         keyboardType="numeric"
         placeholderTextColor="#ccc"
-        onSubmitEditing={() => emailRef.current.focus()}
       />
       <TextInput
         ref={emailRef}
@@ -79,12 +97,11 @@ const RegisterScreen = () => {
         keyboardType="email-address"
         autoCapitalize="none"
         placeholderTextColor="#ccc"
-        onSubmitEditing={() => passwordRef.current.focus()}
       />
       <TextInput
         ref={passwordRef}
         style={styles.input}
-        placeholder="Password"
+        placeholder="Senha"
         value={password}
         onChangeText={setPassword}
         secureTextEntry

@@ -43,9 +43,6 @@ const SelectDentistScreen = ({ especializacaoId, onSelectDentist }) => {
       } if (response.status === 404) {
         setDentistas([]);
       }
-      else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
-      }
     } catch (error) {
       if (error.response) {
         Alert.alert('Erro', `Falha ao buscar dentistas: ${error.response.data.error}`);

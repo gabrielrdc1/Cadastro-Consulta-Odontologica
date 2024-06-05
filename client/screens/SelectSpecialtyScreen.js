@@ -44,9 +44,6 @@ const SelectSpecialtyScreen = ({ onSelectSpecialty }) => {
       } if (response.status === 404) {
         setEspecializacoes([]);
       }
-      else {
-        Alert.alert('Erro', 'Formato de resposta inesperado');
-      }
     } catch (error) {
       if (error.response) {
         Alert.alert('Erro', `Falha ao buscar especializações: ${error.response.data.error}`);
